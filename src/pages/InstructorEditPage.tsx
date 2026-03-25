@@ -1,0 +1,46 @@
+import { useParams, Navigate, Link } from 'react-router-dom'
+import { ChevronLeft } from 'lucide-react'
+import { useQuery } from 'convex/react'
+import { api } from '../../convex/_generated/api'
+import type { Id } from '../../convex/_generated/dataModel'
+import InstructorForm from '@/components/InstructorForm'
+import LoadingSpinner from '@/components/LoadingSpinner'
+
+export default function InstructorEditPage() {
+  const { id } = useParams<{ id: string }>()
+  const instructor = useQuery(
+    api.instructors.getById,
+    id ? { id: id as Id<"instructors"> } : "skip"
+  )
+
+  if (instructor === undefined) {
+    return <LoadingSpinner message="강사 정보를 불러오는 중..." />
+  }
+
+  if (!instructor) {
+    return <Navigate to="/instructors" replace />
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* 헤더 */}
+      <div className="animate-slide-up">
+        <Link
+          to="/instructors"
+          className="mb-3 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-slate-500 transition-colors hover:text-teal-600 hover:bg-teal-50 -ml-2"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          강사 목록으로
+        </Link>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          강사 정보 수정
+        </h1>
+        <p className="mt-1 text-sm text-slate-500">
+          <span className="font-semibold text-slate-700">{instructor.name}</span> 강사의 정보를 수정합니다.
+        </p>
+        <div className="mt-4 h-px bg-gray-200" />
+      </div>
+      <InstructorForm mode="edit" defaultValues={instructor} instructorId={instructor._id} />
+    </div>
+  )
+}
